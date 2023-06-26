@@ -1,0 +1,26 @@
+{
+  "cSpell.words": [
+    "baichuan",
+    "docstrings",
+    "dtype",
+    "fireballoon",
+    "Haotian",
+    "keepdim",
+    "Lianjia",
+    "lmsys",
+    "Multimodal",
+    "numel",
+    "peft",
+    "Pleisto",
+    "qlora",
+    "SOTA",
+    "traning",
+    "venv",
+    "wandb",
+    "Yuren"
+  ],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter"
+  },
+  "python.formatting.provider": "none"
+}

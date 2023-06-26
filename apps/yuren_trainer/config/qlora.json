@@ -1,0 +1,14 @@
+{
+  "r": 64,
+  "lora_alpha": 16,
+  "lora_dropout": 0.05,
+  "lora_target_modules": [
+    "gate_proj",
+    "down_proj",
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj",
+    "up_proj"
+  ]
+}

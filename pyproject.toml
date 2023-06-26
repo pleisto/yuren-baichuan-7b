@@ -1,0 +1,61 @@
+[project]
+name = "yuren"
+version = "0.1.0"
+description = "Yuren is a open source Instruction-following LLM based on baichuan."
+authors = [
+    { name = "Pleisto Inc", email = "engineering@pleisto.com" }
+]
+license = "Apache-2.0"
+dependencies = [
+    "transformers @ git+https://github.com/huggingface/transformers@de9255de27abfcae4a1f816b904915f0b1e23cd9",
+    "sentencepiece>=0.1.99",
+    "einops>=0.6.1",
+    "protobuf==3.*",
+    "bitsandbytes>=0.39.1",
+    "torch>=2.0.1",
+    "accelerate>=0.20.3",
+    "setuptools>=68.0.0",
+    "scipy>=1.10.1",
+]
+readme = "README.md"
+requires-python = ">= 3.10"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "blank>=0.1.0",
+    "ruff>=0.0.274",
+    "isort>=5.12.0",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.rye.workspace]
+members = ["apps/*", "libs/*","tools/*"]
+
+[tool.rye.scripts]
+prepare-base-model = { cmd = ["python", "-mprepare_base_model"] }
+merge-lora = { cmd = ["python", "-mmerge_lora"] }
+
+
+[tool.ruff]
+line-length = 120
+convention = "google"
+
+
+[tool.blank]
+line-length = 120
+target-version = ['py310']
+preview = true
+
+[tool.isort]
+fix = true
+atomic = true
+profile = "black"
+line_length = 120
+py_version = 310

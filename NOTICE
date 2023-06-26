@@ -1,0 +1,19 @@
+Yuren
+Copyright 2023 Pleisto Inc
+
+This product includes or references the following source code made available under the Apache 2.0 license:
+
+Visual Instruction Tuning, <https://github.com/haotian-liu/LLaVA>
+Copyright 2023 Haotian Liu. All Rights Reserved.
+
+FastChat, <https://github.com/lm-sys/FastChat>
+Copyright 2023 Large Model Systems Organization(lmsys.org)
+
+BELLE, <https://github.com/LianjiaTech/BELLE/tree/main>
+Copyright 2023 Lianjia Tech
+
+baichuan-7b, <https://github.com/baichuan-inc/baichuan-7B>
+Copyright 2023 Baichuan Inc
+
+baichuan-llama-7b, <https://huggingface.co/fireballoon/baichuan-llama-7b>
+Copyright 2023 fireballoon

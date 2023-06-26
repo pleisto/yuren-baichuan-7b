@@ -1,0 +1,16 @@
+[project]
+name = "prepare-base-model"
+version = "0.1.0"
+description = "Add a short description here"
+readme = "README.md"
+requires-python = ">= 3.10"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+
+[tool.hatch.metadata]
+allow-direct-references = true

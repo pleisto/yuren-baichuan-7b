@@ -1,0 +1,22 @@
+[project]
+name = "yuren-trainer"
+version = "0.1.0"
+description = "Add a short description here"
+dependencies = [
+    "peft @ git+https://github.com/huggingface/peft",
+    "datasets>=2.13.0",
+    "wandb>=0.15.4",
+    "deepspeed>=0.9.5",
+]
+readme = "README.md"
+requires-python = ">= 3.10"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+
+[tool.hatch.metadata]
+allow-direct-references = true
