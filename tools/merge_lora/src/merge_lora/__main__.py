@@ -17,7 +17,7 @@ import argparse
 
 import torch
 from peft import PeftModel
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 def apply_lora(base_model_path, target_model_path, lora_path):

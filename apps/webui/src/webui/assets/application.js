@@ -1,4 +1,4 @@
-"""
+/*
  Copyright 2023 Pleisto Inc
 
  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,11 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- """
+ */
 
-IM_START_TOKEN = "<|im_start|>"
-IM_END_TOKEN = "<|im_end|>"
-IMAGE_PATCH_TOKEN = "<|img_patch|>"
-IMAGE_START_TOKEN = "<|img_start|>"
-IMAGE_END_TOKEN = "<|img_end|>"
-
-
-PAD_TOKEN_ID = 64000
+window.addEventListener('load', function () {
+  gradioURL = window.location.href
+  if (!gradioURL.endsWith('?__theme=dark')) {
+    window.location.replace(gradioURL + '?__theme=dark');
+  }
+});

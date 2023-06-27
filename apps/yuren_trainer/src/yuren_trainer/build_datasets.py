@@ -15,13 +15,13 @@
  """
 import copy
 import os
+from functools import partial
 from typing import Dict
 
-from functools import partial
-from datasets import load_dataset, Dataset
+from datasets import Dataset, load_dataset
 from transformers import LlamaTokenizer
 from transformers.trainer_pt_utils import LabelSmoother
-from yuren_core.constants import IM_START_TOKEN, IM_END_TOKEN
+from yuren_core.constants import IM_END_TOKEN, IM_START_TOKEN
 
 IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 PRINT_EXAMPLES_NUM = 2

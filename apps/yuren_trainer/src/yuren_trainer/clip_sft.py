@@ -19,22 +19,16 @@
  Copyright 2023 Haotian Liu | Apache License 2.0
  """
 
-from yuren_core.multimodal_llama import MultimodalLlama
-from transformers import Trainer
+import os
 from typing import Optional
+
 import torch
 import torch.nn as nn
-import os
+from transformers import Trainer
+from yuren_core.multimodal_llama import MultimodalLlama
 
 # TODO: wait for refactor and move from our internal monorepo to here,
 # currently this is NOT actually used in the trainer.
-
-
-import os
-from typing import Optional
-import torch
-from torch import nn
-from transformers import Trainer
 
 
 class MultimodalLLamaTrainer(Trainer):

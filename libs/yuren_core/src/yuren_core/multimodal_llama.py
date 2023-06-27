@@ -24,27 +24,18 @@ from typing import List, Optional, Tuple, Union
 import torch
 import torch.nn as nn
 from torch.nn import CrossEntropyLoss
-
 from transformers import (
     AutoConfig,
     AutoModelForCausalLM,
-    LlamaConfig,
-    LlamaModel,
-    LlamaForCausalLM,
-    LlamaTokenizer,
-    CLIPVisionModel,
     CLIPImageProcessor,
+    CLIPVisionModel,
+    LlamaConfig,
+    LlamaForCausalLM,
+    LlamaModel,
 )
-
 from transformers.modeling_outputs import (
     BaseModelOutputWithPast,
     CausalLMOutputWithPast,
-)
-
-from yuren_core.constants import (
-    IMAGE_PATCH_TOKEN,
-    IMAGE_START_TOKEN,
-    IMAGE_END_TOKEN,
 )
 
 
@@ -67,7 +58,6 @@ class MultimodalLlamaModel(LlamaModel):
             self.vision_tower = [
                 CLIPVisionModel.from_pretrained(config.mm_vision_tower)
             ]
-            # self.vision_tower = CLIPVisionModel.from_pretrained(config.mm_vision_tower)
 
         if hasattr(config, "use_mm_proj"):
             self.mm_projector = nn.Linear(config.mm_hidden_size, config.hidden_size)
@@ -112,13 +102,13 @@ class MultimodalLlamaModel(LlamaModel):
                 vision_config.hidden_size, self.config.hidden_size
             )
 
-        if pretrain_mm_mlp_adapter is not None:
-            mm_projector_weights = torch.load(
-                pretrain_mm_mlp_adapter, map_location="cpu"
-            )
-            self.mm_projector.load_state_dict(
-                {k.split(".")[-1]: v for k, v in mm_projector_weights.items()}
-            )
+        # if pretrain_mm_mlp_adapter is not None:
+        #     mm_projector_weights = torch.load(
+        #         pretrain_mm_mlp_adapter, map_location="cpu"
+        #     )
+        #     self.mm_projector.load_state_dict(
+        #         {k.split(".")[-1]: v for k, v in mm_projector_weights.items()}
+        #     )
 
         return dict(
             image_processor=image_processor,
@@ -188,7 +178,13 @@ class MultimodalLlamaModel(LlamaModel):
                     for image_feature in image_features
                 ]
             else:
+                # fix bitsandbytes quantization
+                original_shape = image_features.shape
+                image_features = image_features.contiguous()
+                image_features = image_features.reshape(original_shape)
+
                 image_features = self.mm_projector(image_features)
+
             dummy_image_features = torch.zeros(
                 256, 1024, device=inputs_embeds.device, dtype=inputs_embeds.dtype
             )
@@ -207,101 +203,47 @@ class MultimodalLlamaModel(LlamaModel):
                     new_input_embeds.append(current_input_embeds)
                     current_image_index += 1
                     continue
-                if vision_tower.config.use_im_start_end:
-                    cur_image_features = image_features[current_image_index]
+
+                cur_image_features = image_features[current_image_index]
+                num_patches = cur_image_features.shape[0]
+                if (current_input_ids == vision_tower.config.im_start_token).sum() != (
+                    current_input_ids == vision_tower.config.im_end_token
+                ).sum():
+                    raise ValueError(
+                        "The number of image start tokens and image end tokens should be the same."
+                    )
+                image_start_tokens = torch.where(
+                    current_input_ids == vision_tower.config.im_start_token
+                )[0]
+                for image_start_token_pos in image_start_tokens:
+                    cur_image_features = image_features[current_image_index].to(
+                        device=current_input_embeds.device
+                    )
                     num_patches = cur_image_features.shape[0]
                     if (
-                        current_input_ids == vision_tower.config.im_start_token
-                    ).sum() != (
-                        current_input_ids == vision_tower.config.im_end_token
-                    ).sum():
+                        current_input_ids[image_start_token_pos + num_patches + 1]
+                        != vision_tower.config.im_end_token
+                    ):
                         raise ValueError(
-                            "The number of image start tokens and image end tokens should be the same."
-                        )
-                    image_start_tokens = torch.where(
-                        current_input_ids == vision_tower.config.im_start_token
-                    )[0]
-                    for image_start_token_pos in image_start_tokens:
-                        cur_image_features = image_features[current_image_index].to(
-                            device=current_input_embeds.device
-                        )
-                        num_patches = cur_image_features.shape[0]
-                        if (
-                            current_input_ids[image_start_token_pos + num_patches + 1]
-                            != vision_tower.config.im_end_token
-                        ):
-                            raise ValueError(
-                                "The image end token should follow the image start token."
-                            )
-                        if orig_embeds_params is not None:
-                            cur_new_input_embeds = torch.cat(
-                                (
-                                    current_input_embeds[
-                                        :image_start_token_pos
-                                    ].detach(),
-                                    current_input_embeds[
-                                        image_start_token_pos : image_start_token_pos
-                                        + 1
-                                    ],
-                                    cur_image_features,
-                                    current_input_embeds[
-                                        image_start_token_pos
-                                        + num_patches
-                                        + 1 : image_start_token_pos
-                                        + num_patches
-                                        + 2
-                                    ],
-                                    current_input_embeds[
-                                        image_start_token_pos + num_patches + 2 :
-                                    ].detach(),
-                                ),
-                                dim=0,
-                            )
-                        else:
-                            cur_new_input_embeds = torch.cat(
-                                (
-                                    current_input_embeds[: image_start_token_pos + 1],
-                                    cur_image_features,
-                                    current_input_embeds[
-                                        image_start_token_pos + num_patches + 1 :
-                                    ],
-                                ),
-                                dim=0,
-                            )
-                        current_image_index += 1
-                    new_input_embeds.append(cur_new_input_embeds)
-                else:
-                    cur_image_features = image_features[current_image_index]
-                    num_patches = cur_image_features.shape[0]
-                    if (
-                        current_input_ids == vision_tower.config.im_patch_token
-                    ).sum() != num_patches:
-                        raise ValueError(
-                            "The number of image patch tokens should be the same as the number of image patches."
-                        )
-                    masked_indices = torch.where(
-                        current_input_ids == vision_tower.config.im_patch_token
-                    )[0]
-                    mask_index_start = masked_indices[0]
-                    if (
-                        masked_indices
-                        != torch.arange(
-                            mask_index_start,
-                            mask_index_start + num_patches,
-                            device=masked_indices.device,
-                            dtype=masked_indices.dtype,
-                        )
-                    ).any():
-                        raise ValueError(
-                            "The image patch tokens should be consecutive."
+                            "The image end token should follow the image start token."
                         )
                     if orig_embeds_params is not None:
                         cur_new_input_embeds = torch.cat(
                             (
-                                current_input_embeds[:mask_index_start].detach(),
+                                current_input_embeds[:image_start_token_pos].detach(),
+                                current_input_embeds[
+                                    image_start_token_pos : image_start_token_pos + 1
+                                ],
                                 cur_image_features,
                                 current_input_embeds[
-                                    mask_index_start + num_patches :
+                                    image_start_token_pos
+                                    + num_patches
+                                    + 1 : image_start_token_pos
+                                    + num_patches
+                                    + 2
+                                ],
+                                current_input_embeds[
+                                    image_start_token_pos + num_patches + 2 :
                                 ].detach(),
                             ),
                             dim=0,
@@ -309,14 +251,17 @@ class MultimodalLlamaModel(LlamaModel):
                     else:
                         cur_new_input_embeds = torch.cat(
                             (
-                                current_input_embeds[:mask_index_start],
+                                current_input_embeds[: image_start_token_pos + 1],
                                 cur_image_features,
-                                current_input_embeds[mask_index_start + num_patches :],
+                                current_input_embeds[
+                                    image_start_token_pos + num_patches + 1 :
+                                ],
                             ),
                             dim=0,
                         )
-                    new_input_embeds.append(cur_new_input_embeds)
                     current_image_index += 1
+                new_input_embeds.append(cur_new_input_embeds)
+
             inputs_embeds = torch.stack(new_input_embeds, dim=0)
 
         return super(MultimodalLlamaModel, self).forward(
@@ -463,63 +408,6 @@ class MultimodalLlamaForCausalLM(LlamaForCausalLM):
         output_embeddings[-num_new_tokens:] = output_embeddings_avg
 
         return input_embeddings, output_embeddings
-
-    def initialize_vision_tokenizer(
-        self,
-        mm_use_im_start_end: bool,
-        tokenizer: LlamaTokenizer,
-        device: torch.device,
-        tune_mm_mlp_adapter: bool = False,
-        pretrain_mm_mlp_adapter: Optional[str] = None,
-    ):
-        vision_config = self.get_vision_tower().config
-        vision_config.use_im_start_end = mm_use_im_start_end
-        tokenizer.add_tokens([IMAGE_PATCH_TOKEN], special_tokens=True)
-
-        num_new_tokens = tokenizer.add_tokens(
-            [IMAGE_START_TOKEN, IMAGE_END_TOKEN], special_tokens=True
-        )
-        (
-            vision_config.im_start_token,
-            vision_config.im_end_token,
-        ) = tokenizer.convert_tokens_to_ids([IMAGE_START_TOKEN, IMAGE_END_TOKEN])
-
-        if num_new_tokens > 0:
-            input_embeddings, _output_embeddings = self._set_new_embeddings(
-                self.get_input_embeddings().weight.data,
-                self.get_output_embeddings().weight.data,
-                num_new_tokens,
-            )
-
-        if tune_mm_mlp_adapter:
-            self.get_model().orig_embeds_params = [
-                self.get_input_embeddings().weight.data.clone().to(device=device)
-            ]
-            for p in self.get_input_embeddings().parameters():
-                p.requires_grad = True
-            for p in self.get_output_embeddings().parameters():
-                p.requires_grad = False
-
-        if pretrain_mm_mlp_adapter:
-            mm_projector_weights = torch.load(
-                pretrain_mm_mlp_adapter, map_location="cpu"
-            )
-            embed_tokens_weight = mm_projector_weights["model.embed_tokens.weight"]
-            assert num_new_tokens == 2
-            if input_embeddings.shape == embed_tokens_weight.shape:
-                input_embeddings[-num_new_tokens:] = embed_tokens_weight[
-                    -num_new_tokens:
-                ]
-            elif embed_tokens_weight.shape[0] == num_new_tokens:
-                input_embeddings[-num_new_tokens:] = embed_tokens_weight
-            else:
-                raise ValueError(
-                    f"Unexpected embed_tokens_weight shape. Pretrained: {embed_tokens_weight.shape}. Current: {input_embeddings.shape}. Numer of new tokens: {num_new_tokens}."
-                )
-
-        vision_config.im_patch_token = tokenizer.convert_tokens_to_ids(
-            [IMAGE_PATCH_TOKEN]
-        )[0]
 
 
 AutoConfig.register("multimodal_llama", MultimodalLlamaConfig)

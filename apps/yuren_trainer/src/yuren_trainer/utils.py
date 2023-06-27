@@ -15,11 +15,12 @@
  """
 import os
 import time
-import torch
 from typing import Union
-from transformers.utils import logging
-from transformers.deepspeed import is_deepspeed_zero3_enabled
+
+import torch
 from deepspeed.runtime.engine import DeepSpeedEngine
+from transformers.deepspeed import is_deepspeed_zero3_enabled
+from transformers.utils import logging
 
 
 def create_rank_0_printer(rank: int, output_dir: str):

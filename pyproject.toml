@@ -41,11 +41,11 @@ members = ["apps/*", "libs/*","tools/*"]
 [tool.rye.scripts]
 prepare-base-model = { cmd = ["python", "-mprepare_base_model"] }
 merge-lora = { cmd = ["python", "-mmerge_lora"] }
+webui = { cmd = ["python", "-mwebui.app"] }
 
 
 [tool.ruff]
 line-length = 120
-convention = "google"
 
 
 [tool.blank]
@@ -54,7 +54,6 @@ target-version = ['py310']
 preview = true
 
 [tool.isort]
-fix = true
 atomic = true
 profile = "black"
 line_length = 120

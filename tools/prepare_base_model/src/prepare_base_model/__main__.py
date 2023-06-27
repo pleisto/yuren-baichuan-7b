@@ -15,14 +15,8 @@
  """
 from typing import Dict
 
-from transformers import (
-    AutoConfig,
-    AutoModelForCausalLM,
-    LlamaTokenizer,
-    PreTrainedModel,
-    PreTrainedTokenizer,
-)
-from yuren_core.constants import IM_START_TOKEN, IM_END_TOKEN
+from transformers import AutoConfig, AutoModelForCausalLM, LlamaTokenizer, PreTrainedModel, PreTrainedTokenizer
+from yuren_core.constants import IM_END_TOKEN, IM_START_TOKEN
 
 
 def smart_tokenizer_and_embedding_resize(

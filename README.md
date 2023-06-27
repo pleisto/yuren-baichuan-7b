@@ -2,6 +2,8 @@
 
 羽人是基于[baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B) 进行多任务有监督微调的开源多模态大语言模型, 建立在 [Pleisto](https://github.com/pleisto) 的以数据为中心(Data-centric AI)的工作上。羽人在多轮对话、开放域问答、角色扮演、文本生成、文本理解、图片理解等多个任务上均拥有优异的表现。
 
+YuRen is a multi-modal large language model based on [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B) and trained with multi-task supervised fine-tuning. It is built on top of [Pleisto](https://github.com/pleisto)'s data-centric AI work. YuRen has excellent performance on multi-turn dialogue, open-domain question answering, role-playing, text generation, text understanding, image understanding and other tasks. For more english information, please refer to [model card](https://huggingface.co/pleisto/yuren-7b).
+
 ## 主要亮点
 
 - **多模态**: 参考[LLaVA](https://github.com/haotian-liu/LLaVA) 和 [mPLUG-Owl](https://arxiv.org/abs/2304.14178) 的相关工作, 羽人通过建立线性投影层将 LLM 的语言模态和目前最 SOTA 的 CLIP 模型[laion/clip-vit-l-14-datacomp.xl-s13b-b90k](https://huggingface.co/laion/CLIP-ViT-L-14-DataComp.XL-s13B-b90K) 的视觉编码器进行融合, 从而实现了卓越的图片理解能力。
@@ -12,6 +14,23 @@
 ## 训练数据
 
 遗憾的是, 由于羽人的训练数据集建立在我们的商业数据集的子集之上, 因此我们现阶段没有将其完整开源的计划。目前我们只能提供一个[包含 300 条训练数据的样例数据集](./data/sft.dev.json), 该数据集的格式和我们的完整数据集完全一致, 但是由于数据量太少, 无法训练出一个完整的模型, 仅供大家参考。该样例数据集以[CC BY-SA 4.0 (署名且以相同方式共享)](https://creativecommons.org/licenses/by-sa/4.0/deed.zh-Hans) 协议开源, 详见文件内的`__comment__`字段。
+
+
+## 使用 WebUI 进行推理
+
+### Docker
+
+> Coming soon
+
+### 本地运行
+
+```bash
+# 使用 rye 进行环境管理, 可访问 https://rye-up.com/guide/installation/#installing-rye 查看详情
+curl -sSf https://rye-up.com/get | bash
+source "$HOME/.rye/env"
+rye sync
+rye run webuic "pleisto/yuren-7b" # --load_8bit True --server_name "0.0.0.0" --share True
+```
 
 ## 复现训练
 
