@@ -68,9 +68,7 @@ class ModelArguments:
     )
     cache_dir: Optional[str] = field(
         default=None,
-        metadata={
-            "help": "Where do you want to store the pretrained models and datasets load from huggingface.co"
-        },
+        metadata={"help": "Where do you want to store the pretrained models and datasets load from huggingface.co"},
     )
 
 
@@ -86,18 +84,12 @@ class DataArguments:
     )
     dataset_config_name: Optional[str] = field(
         default=None,
-        metadata={
-            "help": "The configuration name of the dataset to use (via the datasets library)."
-        },
+        metadata={"help": "The configuration name of the dataset to use (via the datasets library)."},
     )
-    train_file: Optional[str] = field(
-        default=None, metadata={"help": "The input training data file (a text file)."}
-    )
+    train_file: Optional[str] = field(default=None, metadata={"help": "The input training data file (a text file)."})
     validation_file: Optional[str] = field(
         default=None,
-        metadata={
-            "help": "An optional input evaluation data file to evaluate the perplexity on (a text file)."
-        },
+        metadata={"help": "An optional input evaluation data file to evaluate the perplexity on (a text file)."},
     )
 
 
@@ -114,9 +106,7 @@ class TrainingArguments(TrainingArguments):
         default=None,
         metadata={"help": "LoRA config file."},
     )
-    gradient_checkpointing: bool = field(
-        default=False, metadata={"help": "Whether to use gradient checkpointing."}
-    )
+    gradient_checkpointing: bool = field(default=False, metadata={"help": "Whether to use gradient checkpointing."})
     report_to: str = field(
         default="wandb",
         metadata={"help": "use wandb to log training process"},
@@ -130,9 +120,7 @@ class TrainingArguments(TrainingArguments):
         default=True,
         metadata={"help": "Whether to verbose log on training process"},
     )
-    ddp_find_unused_parameters: bool = field(
-        default=False, metadata={"help": "ddp_find_unused_parameters"}
-    )
+    ddp_find_unused_parameters: bool = field(default=False, metadata={"help": "ddp_find_unused_parameters"})
 
 
 def enable_qlora_training(
@@ -155,9 +143,7 @@ def enable_qlora_training(
     Returns:
         The model with QLoRA training enabled.
     """
-    device_map = (
-        {"": int(os.environ.get("LOCAL_RANK") or 0)} if world_size != 1 else "auto"
-    )
+    device_map = {"": int(os.environ.get("LOCAL_RANK") or 0)} if world_size != 1 else "auto"
     model = LlamaForCausalLM.from_pretrained(
         model_args.model_name_or_path,
         cache_dir=model_args.cache_dir,
@@ -225,9 +211,7 @@ def init_model_and_tokenizer(
     max_memory = {i: max_memory for i in range(n_gpus)}
 
     if training_args.use_lora:
-        model = enable_qlora_training(
-            training_args, model_args, print_rank_0, world_size, max_memory
-        )
+        model = enable_qlora_training(training_args, model_args, print_rank_0, world_size, max_memory)
 
     else:
         model = LlamaForCausalLM.from_pretrained(
@@ -251,9 +235,7 @@ def main():
     global_rank = torch.distributed.get_rank()
 
     # Setup logging
-    logger = create_logger(
-        __name__, training_args.get_process_log_level(), training_args.should_log
-    )
+    logger = create_logger(__name__, training_args.get_process_log_level(), training_args.should_log)
     print_rank_0 = create_rank_0_printer(global_rank, training_args.output_dir)
 
     # Log on each process the small summary:
@@ -265,20 +247,14 @@ def main():
 
     # Detecting last checkpoint.
     last_checkpoint = None
-    if (
-        os.path.isdir(training_args.output_dir)
-        and training_args.do_train
-        and not training_args.overwrite_output_dir
-    ):
+    if os.path.isdir(training_args.output_dir) and training_args.do_train and not training_args.overwrite_output_dir:
         last_checkpoint = get_last_checkpoint(training_args.output_dir)
         if last_checkpoint is None and len(os.listdir(training_args.output_dir)) > 0:
             raise ValueError(
                 f"Output directory ({training_args.output_dir}) already exists and is not empty. "
                 "Use --overwrite_output_dir to overcome."
             )
-        elif (
-            last_checkpoint is not None and training_args.resume_from_checkpoint is None
-        ):
+        elif last_checkpoint is not None and training_args.resume_from_checkpoint is None:
             logger.info(
                 f"Checkpoint detected, resuming training at {last_checkpoint}. To avoid this behavior, change "
                 "the `--output_dir` or add `--overwrite_output_dir` to train from scratch."
@@ -286,9 +262,7 @@ def main():
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
-    model, tokenizer = init_model_and_tokenizer(
-        model_args, training_args, world_size, print_rank_0
-    )
+    model, tokenizer = init_model_and_tokenizer(model_args, training_args, world_size, print_rank_0)
 
     with torch_distributed_zero_first(global_rank):
         load_dataset = partial(
@@ -304,16 +278,12 @@ def main():
     num_gpus = torch.cuda.device_count()
 
     batch_size = (
-        training_args.per_device_train_batch_size
-        * training_args.world_size
-        * training_args.gradient_accumulation_steps
+        training_args.per_device_train_batch_size * training_args.world_size * training_args.gradient_accumulation_steps
     )
     t_total = math.ceil(training_nums / batch_size) * training_args.num_train_epochs
 
     training_args.warmup_steps = (
-        int(t_total * training_args.warmup_ratio)
-        if training_args.warmup_ratio > 0.0
-        else training_args.warmup_steps
+        int(t_total * training_args.warmup_ratio) if training_args.warmup_ratio > 0.0 else training_args.warmup_steps
     )
     print_rank_0(
         "num_gpus = {}, training_nums = {}, t_total = {}, warmup_steps = {}, eval_steps = {}, save_steps = {}".format(
@@ -326,9 +296,7 @@ def main():
         )
     )
     print_rank_0(
-        "val data nums = {}, training_nums = {}, batch_size = {}".format(
-            len(val_data), training_nums, batch_size
-        )
+        "val data nums = {}, training_nums = {}, batch_size = {}".format(len(val_data), training_nums, batch_size)
     )
 
     trainer = PeftTrainer(
@@ -343,14 +311,10 @@ def main():
     print_rank_0(f"Using {training_args.half_precision_backend} half precision backend")
     # Train!
     len_dataloader = len(trainer.get_train_dataloader())
-    num_update_steps_per_epoch = (
-        len_dataloader // training_args.gradient_accumulation_steps
-    )
+    num_update_steps_per_epoch = len_dataloader // training_args.gradient_accumulation_steps
 
     total_train_batch_size = (
-        training_args.train_batch_size
-        * training_args.gradient_accumulation_steps
-        * training_args.world_size
+        training_args.train_batch_size * training_args.gradient_accumulation_steps * training_args.world_size
     )
     num_examples = trainer.num_examples(trainer.get_train_dataloader())
     num_train_samples = num_examples * training_args.num_train_epochs
@@ -359,16 +323,10 @@ def main():
     print_rank_0(f"  Num examples = {num_examples}")
     print_rank_0(f"  Num train samples = {num_train_samples}")
     print_rank_0(f"  world_size = {world_size}")
-    print_rank_0(
-        f"  Total train batch size (w. parallel, distributed & accumulation) = {total_train_batch_size}"
-    )
-    print_rank_0(
-        f"  Gradient Accumulation steps = {training_args.gradient_accumulation_steps}"
-    )
+    print_rank_0(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_train_batch_size}")
+    print_rank_0(f"  Gradient Accumulation steps = {training_args.gradient_accumulation_steps}")
     print_rank_0(f"  Total optimization steps = {max_steps}")
-    print_rank_0(
-        f"  Number of trainable parameters = {get_model_param_count(model, trainable_only=True)}"
-    )
+    print_rank_0(f"  Number of trainable parameters = {get_model_param_count(model, trainable_only=True)}")
 
     # ref: https://discuss.huggingface.co/t/what-is-the-purpose-of-use-cache-in-decoder/958/3
     model.config.use_cache = False
@@ -376,9 +334,7 @@ def main():
     trainer.train(resume_from_checkpoint=None)
     trainer.save_model()  # https://github.com/huggingface/transformers/blob/main/src/transformers/trainer.py#L2808
 
-    print_rank_0(
-        "\n Training completed!!! If there's a warning about missing keys above, please disregard :)"
-    )
+    print_rank_0("\n Training completed!!! If there's a warning about missing keys above, please disregard :)")
 
 
 if __name__ == "__main__":

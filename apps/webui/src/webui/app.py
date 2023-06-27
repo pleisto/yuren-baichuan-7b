@@ -62,13 +62,19 @@ parser.add_argument(
     "--server_name",
     type=str,
     default=None,
-    help='server_name: to make app accessible on local network, set this to "0.0.0.0". Can be set by environment variable GRADIO_SERVER_NAME. If None, will use "127.0.0.1".',
+    help=(
+        'server_name: to make app accessible on local network, set this to "0.0.0.0". Can be set by environment'
+        ' variable GRADIO_SERVER_NAME. If None, will use "127.0.0.1".'
+    ),
 )
 parser.add_argument(
     "--share",
     type=bool,
     default=False,
-    help="share: whether to create a publicly shareable link for the interface. Creates an SSH tunnel to make your UI accessible from anywhere. ",
+    help=(
+        "share: whether to create a publicly shareable link for the interface. Creates an SSH tunnel to make your UI"
+        " accessible from anywhere. "
+    ),
 )
 args = parser.parse_args()
 
@@ -123,15 +129,9 @@ def predict(
                         ]
                     )
                 # add current conversation
-                chatbot_conversations.append(
-                    [render_user_message(text, image), render_assistant_message(output)]
-                )
+                chatbot_conversations.append([render_user_message(text, image), render_assistant_message(output)])
 
-                new_history = history + [
-                    Conversation(
-                        messages=Messages(user=text, assistant=output), image=image
-                    )
-                ]
+                new_history = history + [Conversation(messages=Messages(user=text, assistant=output), image=image)]
                 yield chatbot_conversations, new_history, "正在生成回答...", None
 
             if shared_state.interrupted:
@@ -203,9 +203,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
                 chatbot = gr.Chatbot(elem_id="yuren-chat")
             with gr.Row():
                 with gr.Column(scale=12):
-                    user_input = gr.Textbox(
-                        show_label=False, placeholder="Enter text", container=False
-                    )
+                    user_input = gr.Textbox(show_label=False, placeholder="Enter text", container=False)
                 with gr.Column(min_width=50, scale=1):
                     submitBtn = gr.Button("✈")
                 with gr.Column(min_width=50, scale=1):
@@ -307,6 +305,4 @@ demo.title = "羽人-baichuan7b"
 
 if __name__ == "__main__":
     reload_javascript()
-    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(
-        share=args.share, server_name=args.server_name
-    )
+    demo.queue(concurrency_count=CONCURRENT_COUNT).launch(share=args.share, server_name=args.server_name)

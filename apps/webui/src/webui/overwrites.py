@@ -35,9 +35,7 @@ def compact_text_chunks(self, prompt: Prompt, text_chunks: List[str]) -> List[st
     return text_splitter.split_text(combined_str)
 
 
-def postprocess(
-    self, y: List[Tuple[str | None, str | None]]
-) -> List[Tuple[str | None, str | None]]:
+def postprocess(self, y: List[Tuple[str | None, str | None]]) -> List[Tuple[str | None, str | None]]:
     """
     Parameters:
         y: List of tuples representing the message and response pairs. Each message and response should be a string, which may be in Markdown format.

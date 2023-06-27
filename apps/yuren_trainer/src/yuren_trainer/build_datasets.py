@@ -48,15 +48,9 @@ def build_text_sft_dataset(
     if filename.endswith(".json") is False or not os.path.exists(filename):
         raise Exception(f"dataset {filename} not exists.")
 
-    data_processor = partial(
-        _generate_and_tokenize_conversations, tokenizer, model_max_length
-    )
+    data_processor = partial(_generate_and_tokenize_conversations, tokenizer, model_max_length)
 
-    data = (
-        load_dataset("json", data_files=filename, cache_dir=cache_dir)["train"]
-        .shuffle()
-        .map(data_processor)
-    )
+    data = load_dataset("json", data_files=filename, cache_dir=cache_dir)["train"].shuffle().map(data_processor)
 
     for i in range(PRINT_EXAMPLES_NUM):
         # since this function is called in torch_distributed_zero_first, no need rank_0_print
@@ -93,9 +87,7 @@ def _generate_and_tokenize_conversations(
             raise ValueError(f"Unknown sentence: {sentence}")
 
         if role == role_mapping["system"]:
-            formatted_sentence = (
-                IM_START_TOKEN + role + "\n" + sentence["value"] + IM_END_TOKEN
-            )
+            formatted_sentence = IM_START_TOKEN + role + "\n" + sentence["value"] + IM_END_TOKEN
         elif role == role_mapping["human"]:
             formatted_sentence = (
                 f"\n{IM_START_TOKEN}"
@@ -109,9 +101,7 @@ def _generate_and_tokenize_conversations(
         else:
             formatted_sentence = sentence["value"] + IM_END_TOKEN
 
-        encoded_sentence = tokenizer.encode(
-            formatted_sentence, add_special_tokens=False
-        )  # do not add bos_token_id
+        encoded_sentence = tokenizer.encode(formatted_sentence, add_special_tokens=False)  # do not add bos_token_id
         label = (
             copy.deepcopy(encoded_sentence)
             if role == role_mapping["gpt"]

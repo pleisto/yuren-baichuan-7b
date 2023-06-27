@@ -81,9 +81,7 @@ def get_ds_state_dict(ds_engine: DeepSpeedEngine):
     return state_dict
 
 
-def get_model_param_count(
-    model: Union[DeepSpeedEngine, torch.nn.Module], trainable_only=False
-):
+def get_model_param_count(model: Union[DeepSpeedEngine, torch.nn.Module], trainable_only=False):
     """
     Calculate model's total param count. If trainable_only is True then count only those requiring grads
     """
@@ -97,6 +95,4 @@ def get_model_param_count(
         def numel(p):
             return p.numel()
 
-    return sum(
-        numel(p) for p in model.parameters() if not trainable_only or p.requires_grad
-    )
+    return sum(numel(p) for p in model.parameters() if not trainable_only or p.requires_grad)

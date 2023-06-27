@@ -77,9 +77,7 @@ class MultimodalLLamaTrainer(Trainer):
                     os.path.join(mm_projector_folder, f"{current_folder}.bin"),
                 )
             else:
-                torch.save(
-                    weights_to_save, os.path.join(output_dir, "mm_projector.bin")
-                )
+                torch.save(weights_to_save, os.path.join(output_dir, "mm_projector.bin"))
 
         # Call the parent class's _save method to handle the remaining save operations
         super(MultimodalLLamaTrainer, self)._save(output_dir, state_dict)

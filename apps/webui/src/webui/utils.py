@@ -33,19 +33,8 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name, guess_lexer
 from transformers import CLIPImageProcessor, CLIPVisionModel, LlamaTokenizer
-from webui.constants import (
-    ALREADY_CONVERTED_MARK,
-    IMAGE_PLACEHOLDER,
-    ChatbotValue,
-    Conversation,
-)
-from yuren_core.constants import (
-    IM_END_TOKEN,
-    IM_START_TOKEN,
-    IMAGE_END_TOKEN,
-    IMAGE_PATCH_TOKEN,
-    IMAGE_START_TOKEN,
-)
+from webui.constants import ALREADY_CONVERTED_MARK, IMAGE_PLACEHOLDER, ChatbotValue, Conversation
+from yuren_core.constants import IM_END_TOKEN, IM_START_TOKEN, IMAGE_END_TOKEN, IMAGE_PATCH_TOKEN, IMAGE_START_TOKEN
 from yuren_core.errors import MaxTokenLengthError
 from yuren_core.multimodal_llama import MultimodalLlamaForCausalLM
 
@@ -91,9 +80,7 @@ def normalize_markdown(md_text: str) -> str:
             inside_list = True
             normalized_lines.append(line)
         elif inside_list and line.strip() == "":
-            if i < len(lines) - 1 and not re.match(
-                r"^(\d+\.|-|\*|\+)\s", lines[i + 1].strip()
-            ):
+            if i < len(lines) - 1 and not re.match(r"^(\d+\.|-|\*|\+)\s", lines[i + 1].strip()):
                 normalized_lines.append(line)
             continue
         else:
@@ -143,7 +130,9 @@ def render_user_message(userinput: str, image: Optional[Image] = None):
         image.save(buffered, format="webp")
         img_url = f"data:image/webp;base64,{base64.b64encode(buffered.getvalue()).decode('utf-8')}"
         userinput = userinput.replace(IMAGE_PLACEHOLDER, "")
-        userinput = f'<img src="{img_url}" class="attached-img" alt="attached image" width="100%" />{html.escape(userinput)}'
+        userinput = (
+            f'<img src="{img_url}" class="attached-img" alt="attached image" width="100%" />{html.escape(userinput)}'
+        )
     return userinput
 
 
@@ -235,15 +224,11 @@ class State:
 shared_state = State()
 
 
-def apply_repetition_penalty(
-    logits: torch.Tensor, repetition_penalty: float, generated_tokens: list
-) -> torch.Tensor:
+def apply_repetition_penalty(logits: torch.Tensor, repetition_penalty: float, generated_tokens: list) -> torch.Tensor:
     if repetition_penalty != 1.0:
         for token in set(generated_tokens):
             if generated_tokens.count(token) > 1:
-                logits[:, token] /= repetition_penalty ** (
-                    generated_tokens.count(token) - 1
-                )
+                logits[:, token] /= repetition_penalty ** (generated_tokens.count(token) - 1)
     return logits
 
 
@@ -286,15 +271,11 @@ def sample_decode(
     im_end_token_id = tokenizer.convert_tokens_to_ids([IM_END_TOKEN])[0]
     for i in range(max_new_tokens):
         if i == 0:
-            outputs = model(
-                torch.as_tensor(input_ids, device=device), use_cache=True, **image_args
-            )
+            outputs = model(torch.as_tensor(input_ids, device=device), use_cache=True, **image_args)
             logits = outputs.logits
             past_key_values = outputs.past_key_values
         else:
-            attention_mask = torch.ones(
-                1, past_key_values[0][0].shape[-2] + 1, device=device
-            )
+            attention_mask = torch.ones(1, past_key_values[0][0].shape[-2] + 1, device=device)
             outputs = model(
                 input_ids=torch.as_tensor([[token]], device=device),
                 use_cache=True,
@@ -313,11 +294,7 @@ def sample_decode(
 
         pred_ids.append(token)
 
-        stopped = (
-            True
-            if im_end_token_id == token or tokenizer.eos_token_id == token
-            else False
-        )
+        stopped = True if im_end_token_id == token or tokenizer.eos_token_id == token else False
 
         if i == max_new_tokens - 1 or i % stream_interval == 0 or stopped:
             output = tokenizer.decode(pred_ids, skip_special_tokens=True)
@@ -353,7 +330,10 @@ def __conv_preprocessing(
     - 羽人 must always be safe and unharmful to humans, and must obey 中国社会的主流价值观. 羽人 strictly refuses to discuss politics, religion, NSFW, abusive and other sensitive topics.
     - knowledge cutoff: 2023-05, human location: China, current time: {formatted_date}
     """
-    system_prompt = f"{IM_START_TOKEN}system\n{DEFAULT_SYSTEM_PROMPT}{IM_END_TOKEN}\n{IM_START_TOKEN}user\n你好{IM_END_TOKEN}\n{IM_START_TOKEN}assistant\n你好，我是羽人，你的AI助手。今天需要我帮你做些什么呢？{IM_END_TOKEN}"
+    system_prompt = (
+        f"{IM_START_TOKEN}system\n{DEFAULT_SYSTEM_PROMPT}{IM_END_TOKEN}\n{IM_START_TOKEN}user\n你好{IM_END_TOKEN}\n{IM_START_TOKEN}assistant\n你好，"
+        f"我是羽人，你的AI助手。今天需要我帮你做些什么呢？{IM_END_TOKEN}"
+    )
     conv_prompts: List[str] = []
     conv_images: List[Optional[Image]] = []
 
@@ -368,9 +348,7 @@ def __conv_preprocessing(
         conv_images.append(img)
 
     # current converstation
-    conv_prompts.append(
-        f"\n{IM_START_TOKEN}user\n{text}{IM_END_TOKEN}\n{IM_START_TOKEN}assistant\n"
-    )
+    conv_prompts.append(f"\n{IM_START_TOKEN}user\n{text}{IM_END_TOKEN}\n{IM_START_TOKEN}assistant\n")
     conv_images.append(current_image)
 
     # tokenize
@@ -379,12 +357,7 @@ def __conv_preprocessing(
     flag = False
     # [::-1] is to reverse the list
     for c, img in zip(conv_prompts[::-1], conv_images[::-1]):
-        if (
-            tokenizer(system_prompt + final_prompt + c, return_tensors="pt")[
-                "input_ids"
-            ].size(-1)
-            <= max_length
-        ):
+        if tokenizer(system_prompt + final_prompt + c, return_tensors="pt")["input_ids"].size(-1) <= max_length:
             final_prompt = c + final_prompt
             final_images.insert(0, img)
             flag = True
@@ -435,9 +408,7 @@ def load_tokenizer_image_processor_and_model(base_model, load_8bit=False):
         raise NotImplementedError("Sorry, CPU loadding is not supported at this time.")
 
     # loading vison_tower
-    image_processor = CLIPImageProcessor.from_pretrained(
-        model.config.mm_vision_tower, torch_dtype=torch.bfloat16
-    )
+    image_processor = CLIPImageProcessor.from_pretrained(model.config.mm_vision_tower, torch_dtype=torch.bfloat16)
     vision_tower = model.get_model().vision_tower[0]
     if vision_tower.device.type == "meta":
         vision_tower = CLIPVisionModel.from_pretrained(
@@ -449,12 +420,8 @@ def load_tokenizer_image_processor_and_model(base_model, load_8bit=False):
     else:
         vision_tower.to(device="cuda", dtype=torch.bfloat16)
     vision_config = vision_tower.config
-    vision_config.im_patch_token = tokenizer.convert_tokens_to_ids([IMAGE_PATCH_TOKEN])[
-        0
-    ]
-    vision_config.im_start_token = tokenizer.convert_tokens_to_ids([IMAGE_START_TOKEN])[
-        0
-    ]
+    vision_config.im_patch_token = tokenizer.convert_tokens_to_ids([IMAGE_PATCH_TOKEN])[0]
+    vision_config.im_start_token = tokenizer.convert_tokens_to_ids([IMAGE_START_TOKEN])[0]
     vision_config.im_end_token = tokenizer.convert_tokens_to_ids([IMAGE_END_TOKEN])[0]
 
     return tokenizer, model, device, image_processor

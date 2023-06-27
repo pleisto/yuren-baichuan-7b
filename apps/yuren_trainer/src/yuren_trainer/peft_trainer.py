@@ -25,9 +25,7 @@ from .utils import get_ds_state_dict
 
 
 class PeftTrainer(Trainer):
-    def save_model(
-        self, output_dir: Optional[str] = None, _internal_call: bool = False
-    ):
+    def save_model(self, output_dir: Optional[str] = None, _internal_call: bool = False):
         """
         Add supports for peft
 
@@ -101,13 +99,9 @@ class PeftTrainer(Trainer):
                     safe_serialization=self.args.save_safetensors,
                 )
             else:
-                logger.info(
-                    "Trainer.model is not a `PreTrainedModel`, only saving its state dict."
-                )
+                logger.info("Trainer.model is not a `PreTrainedModel`, only saving its state dict.")
                 if self.args.save_safetensors:
-                    safetensors.torch.save_file(
-                        state_dict, os.path.join(output_dir, SAFE_WEIGHTS_NAME)
-                    )
+                    safetensors.torch.save_file(state_dict, os.path.join(output_dir, SAFE_WEIGHTS_NAME))
                 else:
                     torch.save(state_dict, os.path.join(output_dir, WEIGHTS_NAME))
         else:

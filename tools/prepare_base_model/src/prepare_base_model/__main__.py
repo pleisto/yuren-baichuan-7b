@@ -36,27 +36,19 @@ def smart_tokenizer_and_embedding_resize(
 
     # check if current token embedding has a available size
     model_vocab_size = model.get_input_embeddings().weight.shape[0]
-    has_available_size = (
-        model_vocab_size >= len(tokenizer) and model_vocab_size % VOCAB_MULTIPLE == 0
-    )
+    has_available_size = model_vocab_size >= len(tokenizer) and model_vocab_size % VOCAB_MULTIPLE == 0
 
     # resize token embedding if not has available size
     if not has_available_size:
         # find the closest divisible by 64 with len(tokenizer)
-        model.resize_token_embeddings(
-            (len(tokenizer) + VOCAB_MULTIPLE - 1) // VOCAB_MULTIPLE * VOCAB_MULTIPLE
-        )
+        model.resize_token_embeddings((len(tokenizer) + VOCAB_MULTIPLE - 1) // VOCAB_MULTIPLE * VOCAB_MULTIPLE)
 
     if num_new_tokens > 0:
         input_embeddings = model.get_input_embeddings().weight.data
         output_embeddings = model.get_output_embeddings().weight.data
 
-        input_embeddings_avg = input_embeddings[:-num_new_tokens].mean(
-            dim=0, keepdim=True
-        )
-        output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(
-            dim=0, keepdim=True
-        )
+        input_embeddings_avg = input_embeddings[:-num_new_tokens].mean(dim=0, keepdim=True)
+        output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(dim=0, keepdim=True)
 
         input_embeddings[-num_new_tokens:] = input_embeddings_avg
         output_embeddings[-num_new_tokens:] = output_embeddings_avg
@@ -82,9 +74,7 @@ def main():
     model_config.max_position_embeddings = 4096
     model_config.max_sequence_length = model_config.max_position_embeddings
 
-    model = AutoModelForCausalLM.from_pretrained(
-        original_model_path, device_map="auto", config=model_config
-    )
+    model = AutoModelForCausalLM.from_pretrained(original_model_path, device_map="auto", config=model_config)
 
     smart_tokenizer_and_embedding_resize(
         special_tokens_dict=special_tokens_dict,

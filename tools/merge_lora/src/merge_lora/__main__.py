@@ -22,9 +22,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 def apply_lora(base_model_path, target_model_path, lora_path):
     print(f"Loading the base model from {base_model_path}")
-    base = AutoModelForCausalLM.from_pretrained(
-        base_model_path, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True
-    )
+    base = AutoModelForCausalLM.from_pretrained(base_model_path, torch_dtype=torch.bfloat16, low_cpu_mem_usage=True)
     base_tokenizer = AutoTokenizer.from_pretrained(base_model_path, use_fast=False)
 
     print(f"Loading the LoRA adapter from {lora_path}")
@@ -45,15 +43,9 @@ def apply_lora(base_model_path, target_model_path, lora_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--base-model-path", type=str, required=True, help="Base model path"
-    )
-    parser.add_argument(
-        "--lora-path", type=str, required=True, help="LoRA adapter path"
-    )
-    parser.add_argument(
-        "--target-model-path", type=str, required=True, help="Merged model path"
-    )
+    parser.add_argument("--base-model-path", type=str, required=True, help="Base model path")
+    parser.add_argument("--lora-path", type=str, required=True, help="LoRA adapter path")
+    parser.add_argument("--target-model-path", type=str, required=True, help="Merged model path")
 
     args = parser.parse_args()
 
