@@ -5,6 +5,10 @@ build/
 dist/
 wheels/
 *.egg-info
-
+.DS_Store
 # venv
 .venv
+.ipynb_checkpoints
+*.tsbuildinfo
+*.log
+*.egg-info/
