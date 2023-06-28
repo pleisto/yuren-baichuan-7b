@@ -139,11 +139,11 @@ def predict(
                 try:
                     yield chatbot_conversations, new_history, "已停止生成回答", None
                     return
-                except:
+                except:  # noqa: E722
                     pass
 
     except MaxTokenLengthError:
-        yield chatbot, history, "您输入的内容加上历史消息超过了最大Token长度限制，请缩短输入内容或者删除历史消息。", image
+        yield chatbot, history, "您输入的内容加上历史消息超过了最大Token长度限制，请缩短内容或者删除历史消息。", image
         return
 
     torch.cuda.empty_cache()
@@ -151,11 +151,10 @@ def predict(
     try:
         conversation = chatbot_conversations[-1]
         logging.info(
-            "Finish generating answer",
-            {"user": conversation[0], "assistant": conversation[1]},
+            f"Finish generating answer: \n User: {conversation[0]} \n Assistant: {conversation[1]} \n\n",
         )
         yield chatbot_conversations, new_history, "回答完毕", None
-    except:
+    except:  # noqa: E722
         pass
 
 
@@ -179,7 +178,7 @@ def retry(
         top_p,
         temperature,
         max_length_tokens,
-        conversation["image"].copy(),
+        conversation["image"],
     ):
         yield x
 
