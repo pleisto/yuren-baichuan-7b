@@ -4,7 +4,7 @@
 
 羽人是基于 [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B) 进行多任务有监督微调的开源多模态大语言模型, 建立在 [Pleisto](https://github.com/pleisto) 的以数据为中心(Data-centric AI)的工作上。羽人在多轮对话、开放域问答、角色扮演、文本生成、文本理解、图片理解等多个任务上均拥有优异的表现。
 
-YuRen is a multi-modal large language model based on [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B) and trained with multi-task supervised fine-tuning. It is built on top of [Pleisto](https://github.com/pleisto)'s data-centric AI work. YuRen has excellent performance on multi-turn dialogue, open-domain question answering, role-playing, text generation, text understanding, image understanding and other tasks. For more english information, please refer to [model card](https://huggingface.co/pleisto/yuren-7b).
+YuRen is a multi-modal large language model based on [baichuan-inc/baichuan-7B](https://huggingface.co/baichuan-inc/baichuan-7B) and trained with multi-task supervised fine-tuning. It is built on top of [Pleisto](https://github.com/pleisto)'s data-centric AI work. YuRen has excellent performance on multi-turn dialogue, open-domain question answering, role-playing, text generation, text understanding, image understanding and other tasks. For more english information, please refer to [model card](https://huggingface.co/pleisto/yuren-baichuan-7b).
 
 ## 主要亮点
 
