@@ -12,7 +12,7 @@ RUN apt update && \
 ENV RYE_HOME="/opt/rye"
 ENV PATH="$RYE_HOME/shims:$PATH"
 
-RUN curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash 
+RUN curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash
 
 WORKDIR /src
 
@@ -22,10 +22,13 @@ SHELL [ "bash", "-c" ]
 
 RUN rye sync --no-dev --no-lock
 
-FROM base 
+FROM base
 
 WORKDIR /src
 # put the model file in here
-VOLUME [ "/yuren-7b" ]
+VOLUME [ "/pleisto/yuren-7b" ]
 
-ENTRYPOINT [ "rye","run" ,"webui" ,"/yuren-7b"]
+# Expose for web service
+EXPOSE 7860
+
+ENTRYPOINT [ "rye","run" ,"webui" ,"/pleisto/yuren-7b"]
