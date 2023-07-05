@@ -1,5 +1,5 @@
 # This Dockerfile is  work in progress
-FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04 as base
+FROM nvidia/cuda:11.0.3-runtime-ubuntu20.04 as base
 ARG DEBIAN_FRONTEND=noninteractive
 
 
@@ -28,4 +28,4 @@ WORKDIR /src
 # put the model file in here
 VOLUME [ "/yuren-7b" ]
 
-ENTRYPOINT [ "rye","webui" ,"/yuren-7b"]
+ENTRYPOINT [ "rye","webui" , "run" ,"/yuren-7b"]
