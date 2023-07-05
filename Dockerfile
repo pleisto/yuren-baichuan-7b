@@ -1,11 +1,12 @@
 # This Dockerfile is  work in progress
-FROM nvidia/cuda:11.0.3-runtime-ubuntu20.04 as base
+FROM nvidia/cuda:11.7.1-runtime-ubuntu20.04 as base
 ARG DEBIAN_FRONTEND=noninteractive
 
 
 RUN apt update && \
     apt upgrade -y && \
-    apt install --fix-missing -y git curl dos2unix
+    apt install --fix-missing -y git curl dos2unix \
+        libcudnn8 libcupt-common cuda-cupti-11-7
 
 
 ENV RYE_HOME="/opt/rye"
@@ -24,8 +25,7 @@ RUN rye sync --no-dev --no-lock
 FROM base 
 
 WORKDIR /src
-
 # put the model file in here
 VOLUME [ "/yuren-7b" ]
 
-ENTRYPOINT [ "rye","webui" , "run" ,"/yuren-7b"]
+ENTRYPOINT [ "rye","run" ,"webui" ,"/yuren-7b"]
