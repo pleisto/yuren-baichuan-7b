@@ -4,12 +4,14 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 
 RUN apt update && \
+    apt upgrade -y && \
     apt install --fix-missing -y git curl dos2unix
 
-ENV PATH="$RYE_HOME/shims:$PATH"
-ENV RYE_HOME="/opt/rye"
 
-RUN curl -vsSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash 
+ENV RYE_HOME="/opt/rye"
+ENV PATH="$RYE_HOME/shims:$PATH"
+
+RUN curl -sSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash 
 
 WORKDIR /src
 
