@@ -19,7 +19,7 @@ COPY . .
 
 SHELL [ "bash", "-c" ]
 
-RUN rye sync -v --no-dev --no-lock
+RUN rye sync --no-dev --no-lock
 
 FROM base 
 
