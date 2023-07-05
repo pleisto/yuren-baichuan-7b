@@ -1,25 +1,29 @@
 # This Dockerfile is  work in progress
 FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04 as base
-
-
-# Skip Debian 
 ARG DEBIAN_FRONTEND=noninteractive
 
 
 RUN apt update && \
     apt install --fix-missing -y git curl dos2unix
 
-RUN curl -vsSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash 
+ENV PATH="$RYE_HOME/shims:$PATH"
+ENV RYE_HOME="/opt/rye"
 
-COPY . /src
+RUN curl -vsSf https://rye-up.com/get | RYE_INSTALL_OPTION="--yes" bash 
 
 WORKDIR /src
 
+COPY . .
+
 SHELL [ "bash", "-c" ]
 
-RUN --mount=type=cache,target=/root/.cache \
-    source ~/.rye/env && rye sync -v --features webui
+RUN rye sync -v --no-dev --no-lock
 
+FROM base 
+
+WORKDIR /src
+
+# put the model file in here
 VOLUME [ "/yuren-7b" ]
 
-ENTRYPOINT [ "rye","run","webui","/yuren-7b" ]
+ENTRYPOINT [ "rye","webui" ,"/yuren-7b"]
