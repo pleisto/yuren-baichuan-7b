@@ -28,7 +28,7 @@ YuRen is a multi-modal large language model based on [baichuan-inc/baichuan-7B](
 curl -sSf https://rye-up.com/get | bash
 source "$HOME/.rye/env"
 rye sync
-rye run webui "pleisto/yuren-7b" # --load_8bit True --server_name "0.0.0.0" --share True
+rye run webui "pleisto/yuren-baichuan-7b" # --load_8bit True --server_name "0.0.0.0" --share True
 ```
 
 ## 局限性
