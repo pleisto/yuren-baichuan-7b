@@ -67,7 +67,7 @@ rye run webui "pleisto/yuren-baichuan-7b" # --load_8bit True --server_name "0.0.
 
 ### C-Eval 中文评测
 
-|        Model 5-shot         | Average | Avg(Hard) | STEM  | Social Sciences | Humanities | Others |
+|        Model         | Average | Avg(Hard) | STEM  | Social Sciences | Humanities | Others |
 | :-------------------------: | :-----: | :-------: | :---: | :-------------: | :--------: | :----: |
 |            GPT-4            |  68.7   |   54.9    | 67.1  |      77.6       |    64.5    |  67.8  |
 |           ChatGPT           |  54.4   |   41.4    | 52.9  |      61.8       |    50.9    |  53.6  |
