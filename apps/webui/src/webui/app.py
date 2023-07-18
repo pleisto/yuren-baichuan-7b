@@ -17,6 +17,7 @@
 import argparse
 import logging
 from typing import List, Optional
+import os
 
 import gradio as gr
 import torch
@@ -300,7 +301,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         show_progress=True,
     )
 
-demo.title = "羽人-baichuan7b"
+demo.title = os.getenv("YUREN_WEB_TITLE","羽人-baichuan7b")
 
 if __name__ == "__main__":
     reload_javascript()

@@ -27,7 +27,7 @@ FROM base
 WORKDIR /src
 # put the model file in here
 VOLUME [ "/pleisto/yuren-7b" ]
-
+ENV YUREN_WEB_TITLE "羽人-baichuan7b"
 # Expose for web service
 EXPOSE 7860
 
