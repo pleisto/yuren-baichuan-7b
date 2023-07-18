@@ -28,7 +28,7 @@ YuRen is a multi-modal large language model based on [baichuan-inc/baichuan-7B](
 curl -sSf https://rye-up.com/get | bash
 source "$HOME/.rye/env"
 rye sync
-rye run webui "pleisto/yuren-7b" # --load_8bit True --server_name "0.0.0.0" --share True
+rye run webui "pleisto/yuren-baichuan-7b" # --load_8bit True --server_name "0.0.0.0" --share True
 ```
 
 ## 局限性
@@ -40,6 +40,54 @@ rye run webui "pleisto/yuren-7b" # --load_8bit True --server_name "0.0.0.0" --sh
 ## 训练数据
 
 遗憾的是, 由于羽人的训练数据集建立在我们的商业数据集的子集之上, 因此我们现阶段没有将其完整开源的计划。目前我们只能提供一个[包含 300 条训练数据的样例数据集](./data/sft.dev.json), 该数据集的格式和我们的完整数据集完全一致, 但是由于数据量太少, 无法训练出一个完整的模型, 仅供大家参考。该样例数据集以[CC BY-SA 4.0 (署名且以相同方式共享)](https://creativecommons.org/licenses/by-sa/4.0/deed.zh-Hans) 协议开源, 详见文件内的`__comment__`字段。
+
+
+## 评测结果
+
+> 评测环境： [OpenCompass 20230706](https://github.com/internLM/OpenCompass/)， 使用 zero-shot CoT (Chain-of-Thought) 方法测试
+
+作为多模态模型羽人7b在一部分参数量被VQA（视觉问答）任务占用的情况下，依然在纯文本模态领域取得了较好的评测成绩，目前在主流的7B LLM中占第三名。值得注意的是这还是在羽人7b仅进行了SFT，没有进行进一步的RLHF对齐的情况下取得的成绩。
+
+### MMLU 英文评测
+
+| Model                                  | Humanities | Social Sciences | STEM | Other | Average |
+|----------------------------------------|-----------:|:---------------:|:----:|:-----:|:-------:|
+| LLaMA-7B<sup>2</sup>                   |       34.0 |      38.3       | 30.5 | 38.1  |  35.1   |
+| Falcon-7B<sup>1</sup>                  |          - |        -        |  -   |   -   |  35.0   |
+| mpt-7B<sup>1</sup>                     |          - |        -        |  -   |   -   |  35.6   |
+| ChatGLM-6B<sup>0</sup>                 |       35.4 |      41.0       | 31.3 | 40.5  |  36.9   |
+| BLOOM 7B<sup>0</sup>                  |       25.0 |      24.4       | 26.5 | 26.4  |  25.5   |
+| BLOOMZ 7B<sup>0</sup>                 |       31.3 |      42.1       | 34.4 | 39.0  |  36.1   |
+| moss-moon-003-base (16B)<sup>0</sup>   |       24.2 |      22.8       | 22.4 | 24.4  |  23.6   |
+| moss-moon-003-sft (16B)<sup>0</sup>    |       30.5 |      33.8       | 29.3 | 34.4  |  31.9   |
+| Baichuan-7B<sup>0</sup>           |       38.4 |      48.9       | 35.6 | 48.1  |  42.3   |
+| **羽人-baichuan-7b-多模态**           |       **41.77** |      **53.97**       | **39.90** | **41.33**  |  **44.24**   |
+| chatglm2-6b | 41.23 | 51.61	| 40.06 | 51.24 | 45.46 |
+| InternLM-Chat-7b | - | - | - | - | 50.8	|
+
+### C-Eval 中文评测
+
+|        Model         | Average | Avg(Hard) | STEM  | Social Sciences | Humanities | Others |
+| :-------------------------: | :-----: | :-------: | :---: | :-------------: | :--------: | :----: |
+|            GPT-4            |  68.7   |   54.9    | 67.1  |      77.6       |    64.5    |  67.8  |
+|           ChatGPT           |  54.4   |   41.4    | 52.9  |      61.8       |    50.9    |  53.6  |
+|         Claude-v1.3         |  54.2   |   39.0    | 51.9  |      61.7       |    52.1    |  53.7  |
+|     Claude-instant-v1.0     |  45.9   |   35.5    | 43.1  |      53.8       |    44.2    |  45.4  |
+|          BLOOMZ-7B          |  35.7   |   25.8    | 31.3  |      43.5       |    36.6    |  35.6  |
+|         ChatGLM-6B          |  34.5   |   23.1    | 30.4  |      39.6       |    37.4    |  34.5  |
+|   Ziya-LLaMA-13B-pretrain   |  30.2   |   22.7    | 27.7  |      34.4       |    32.0    |  28.9  |
+|  moss-moon-003-base (16B)   |  27.4   |   24.5    | 27.0  |      29.1       |    27.2    |  26.9  |
+|         LLaMA-7B-hf         |  27.1   |   25.9    | 27.1  |      26.8       |    27.9    |  26.3  |
+|          Falcon-7B          |  25.8   |   24.3    | 25.8  |      26.0       |    25.8    |  25.6  |
+|      TigerBot-7B-base       |  25.7   |   27.0    | 27.3  |      24.7       |    23.4    |  26.1  |
+|    Aquila-7B<sup>*</sup>    |  25.5   |   25.2    | 25.6  |      24.6       |    25.2    |  26.6  |
+| Open-LLaMA-v2-pretrain (7B) |  24.0   |   22.5    | 23.1  |      25.3       |    25.2    |  23.2  |
+|          BLOOM-7B           |  22.8   |   20.2    | 21.8  |      23.3       |    23.9    |  23.3  |
+|       Baichuan-7B       |  42.8   |   31.5    | 38.2  |      52.0       |    46.2    |  39.3  |
+|       **羽人-baichuan-7b-多模态**       |  44.97   |   31.7    | 47.04  |      52.0       |    43.08    |  45.31  |
+| chatglm2-6b | 50.1 | -	| 46.4	 | 60.4 | 50.6 | 46.9 |
+| InternLM-Chat-7b | 53.2 | - | - | - | -	| - |
+
 
 ## 复现训练
 
