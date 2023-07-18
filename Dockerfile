@@ -20,7 +20,8 @@ COPY . .
 
 SHELL [ "bash", "-c" ]
 
-RUN rye sync --no-lock
+RUN ${RYE_HOME}/self/bin/pip install -U pip==23.1
+RUN rye sync
 
 FROM base
 
