@@ -79,7 +79,6 @@ parser.add_argument(
 )
 
 
-
 args = parser.parse_args()
 
 tokenizer, model, device, image_processor = load_tokenizer_image_processor_and_model(
