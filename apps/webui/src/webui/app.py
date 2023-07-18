@@ -77,6 +77,9 @@ parser.add_argument(
         " accessible from anywhere. "
     ),
 )
+
+
+
 args = parser.parse_args()
 
 tokenizer, model, device, image_processor = load_tokenizer_image_processor_and_model(
@@ -301,7 +304,7 @@ with gr.Blocks(css=customCSS, theme=small_and_beautiful_theme) as demo:
         show_progress=True,
     )
 
-demo.title = os.getenv("YUREN_WEB_TITLE","羽人-baichuan7b")
+demo.title = os.getenv("YUREN_WEB_TITLE", "羽人 7b")
 
 if __name__ == "__main__":
     reload_javascript()
