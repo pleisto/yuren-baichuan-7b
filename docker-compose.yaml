@@ -1,0 +1,24 @@
+version: '3.7'
+name: yuren
+
+services:
+  yuren:
+    image: ghcr.io/pleisto/yuren-7b/yuren-7b:latest
+    tty: true
+    ports:
+      - 7860:7860
+    volumes:
+      - <Model DIR>:/pleisto/yuren-7b
+      - <Huggingface cache dir>:/root/.cache/huggingface
+    command:
+      - --server_name
+      - 0.0.0.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: ["gpu"]
+              count: all
+              driver: nvidia
+              options:
+                virtualization: false

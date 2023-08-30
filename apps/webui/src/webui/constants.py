@@ -21,7 +21,7 @@ import gradio as gr
 from PIL.Image import Image
 from yuren_core.constants import IMAGE_END_TOKEN, IMAGE_PATCH_TOKEN, IMAGE_START_TOKEN
 
-title = "羽人7B Demo"
+title = os.getenv("YUREN_WEB_TITLE", "羽人7b Demo")
 description_top = """\
 <div align="left" style="margin:16px 0">
 For Internal Use Only</div>
