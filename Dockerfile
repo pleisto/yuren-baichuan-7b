@@ -1,12 +1,12 @@
 # This Dockerfile is  work in progress
-FROM nvidia/cuda:11.7.1-runtime-ubuntu20.04 as base
+FROM nvidia/cuda:12.3.1-runtime-ubuntu20.04 as base
 ARG DEBIAN_FRONTEND=noninteractive
 
 
 RUN apt update && \
     apt upgrade -y && \
     apt install --fix-missing -y git curl dos2unix \
-        libcudnn8 libcupt-common cuda-cupti-11-7
+        libcudnn8 libcupt-common cuda-cupti-12-3
 
 
 ENV RYE_HOME="/opt/rye"
@@ -21,7 +21,8 @@ COPY . .
 SHELL [ "bash", "-c" ]
 
 RUN ${RYE_HOME}/self/bin/pip install -U pip==23.1
-RUN rye sync
+RUN --mount=type=cache,target=~/.cache \
+  rm requirements-dev.lock requirements.lock && rye sync --verbose
 
 FROM base
 
